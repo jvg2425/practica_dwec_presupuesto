@@ -44,6 +44,33 @@ if (botonActualizar) {
 }
 
 
+function nuevoGastoWeb(){
+    // Pedimos los datos del nuevo gasto al usuario
+    const descripcion = prompt("Introduce la descripción del gasto:");
+    if (descripcion === null) return;
+    const valor = prompt("Introduce el valor del gasto:");
+    if (valor === null) return;
+    const fecha = prompt("Introduce la fecha del gasto (YYYY-MM-DD):");
+    if (fecha === null) return;
+    const etiquetasInput = prompt("Introduce las etiquetas del gasto (separadas por comas):");
+    if (etiquetasInput === null) return;
+    const etiquetas = etiquetasInput.split(",").map(etiqueta => etiqueta.trim());
+
+    // Creamos el nuevo gasto y lo añadimos al presupuesto
+    const nuevoGasto = new Gestion.CrearGasto(descripcion, parseFloat(valor), fecha, etiquetas);
+    Gestion.anyadirGasto(nuevoGasto);
+
+    // Repintamos la información actualizada
+    repintar();
+}
+// Añadimos el evento al botón de añadir gasto
+const botonAnyadirGasto = document.getElementById("anyadirgasto");
+if (botonAnyadirGasto) {
+    botonAnyadirGasto.addEventListener("click", nuevoGastoWeb);
+} else {
+    console.warn("No se encontró el botón de añadir gasto");
+}
+
 
 function mostrarDatoEnId(idElemento, valor) {
     const elemento = document.getElementById(idElemento);
