@@ -27,6 +27,100 @@ function repintar(){
 }
 
 
+
+// Handler para cerrar formularios. Cierra el form y habilita el botón de añadir gasto.
+let FormularioCerrar = {
+    handleEvent: function (e) {
+        this.formulario.remove();
+        this.botonEditar.removeAttribute("disabled");
+    }
+}
+
+
+
+function nuevoGastoWebFormulario(event){
+    // Handler para el formulario
+    function formularioCrearHandle(e) {
+        e.preventDefault() // Previene el envío por defecto del formulario.
+
+        // Obtenemos los datos del formulario
+        const descripcion = e.currentTarget.descripcion.value;
+        const valor = parseFloat(e.currentTarget.valor.value);
+        const fecha = e.currentTarget.fecha.value;
+        const etiquetas = e.currentTarget.etiquetas.value.split(",");
+        // Creamos el nuevo gasto y lo añadimos al presupuesto
+        Gestion.anyadirGasto(new Gestion.CrearGasto(descripcion, valor, fecha, etiquetas));
+        repintar()
+        
+        // Elimina el formulario y habilita el botón de añadir gasto
+        e.currentTarget.remove();
+        document.getElementById("anyadirgasto-formulario").removeAttribute("disabled");
+    }
+
+    // Clonamos el template del formulario
+    const plantillaFormulario = document.getElementById("formulario-template")
+        .content.cloneNode(true);
+    // Accedemos al elemento form dentro del template clonado
+    const formulario = plantillaFormulario.querySelector("form");
+
+    // Accedemos a los botones dentro del formulario
+    const botonCancelar = formulario.querySelector("button.cancelar");
+    const botonActual = event.currentTarget;
+    
+    // Añadimos listener al botón de enviar
+    formulario.addEventListener("submit", formularioCrearHandle);
+
+    // Boton cancelar: elimina el formulario y habilita el botón de añadir gasto
+    let cancelarHandle = Object.create(FormularioCerrar)
+    cancelarHandle.formulario = formulario;
+    cancelarHandle.botonEditar = botonActual;
+    botonCancelar.addEventListener("click", cancelarHandle);
+
+    // DEhabilitar el botón de editar
+    botonActual.setAttribute("disabled", "disabled");
+
+    // Añadimos el formulario al body
+    event.target.parentNode.appendChild(plantillaFormulario);
+}
+// Añaidmos el evento al botón de añadir gasto
+const botonAnyadirGastoFormulario = document.getElementById("anyadirgasto-formulario");
+if (botonAnyadirGastoFormulario) {
+    botonAnyadirGastoFormulario.addEventListener("click", nuevoGastoWebFormulario);
+} else {
+    console.warn("No se encontró el botón de añadir gasto con formulario");
+}
+
+function anyadirGastoFormulario(){
+    const template = document.getElementById("formulario-template");
+    const formulario = template.content.cloneNode(true);
+    document.body.appendChild(formulario);
+
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        const descripcion = document.getElementById("descripcion").value;
+        const valor = parseFloat(document.getElementById("valor").value);
+        const fecha = document.getElementById("fecha").value;
+        const etiquetasInput = document.getElementById("etiquetas").value;
+        const etiquetas = etiquetasInput.split(",").map(etiqueta => etiqueta.trim());
+
+        const nuevoGasto = new Gestion.CrearGasto(descripcion, valor, fecha, etiquetas);
+        Gestion.anyadirGasto(nuevoGasto);
+
+        // Eliminar el formulario después de enviar
+        document.body.removeChild(form.parentElement);
+
+        repintar();
+    });
+
+    // Añadir evento al botón cancelar
+    const botonCancelar = form.querySelector(".cancelar");
+    botonCancelar.addEventListener("click", function() {
+        document.body.removeChild(form.parentElement);
+    });
+}
+
+
 function actualizarPresupuestoWeb(){
     let nuevoPresupuesto = prompt("Introduce el nuevo presupuesto:");
     if (nuevoPresupuesto !== null) {
