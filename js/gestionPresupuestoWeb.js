@@ -75,22 +75,28 @@ if (botonAnyadirGasto) {
 // Editor de gasto, usando un manejador de eventos y una función constructora
 let EditarHandle = {
     handleEvent: function(event) {
+        // Recuperamos los valores actuales del gasto para mostrarlos como valores por defecto en los prompts
+        const descripcionActual = this.gasto.descripcion;
+        const valorActual = this.gasto.valor;
+        const fechaActual = new Date(this.gasto.fecha).toISOString().split('T')[0]; // Convertimos a formato YYYY-MM-DD
+        const etiquetasActuales = this.gasto.etiquetas.join(", ");
+
         // Pedimos los datos del nuevo gasto al usuario
-        const descripcion = prompt("Introduce la descripción del gasto:");
+        const descripcion = prompt("Introduce la descripción del gasto:", descripcionActual);
         if (descripcion === null) return;
-        const valor = prompt("Introduce el valor del gasto:");
+        const valor = prompt("Introduce el valor del gasto:", valorActual);
         if (valor === null) return;
-        const fecha = prompt("Introduce la fecha del gasto (YYYY-MM-DD):");
+        const fecha = prompt("Introduce la fecha del gasto (YYYY-MM-DD):", fechaActual);
         if (fecha === null) return;
-        const etiquetasInput = prompt("Introduce las etiquetas del gasto (separadas por comas):");
+        const etiquetasInput = prompt("Introduce las etiquetas del gasto (separadas por comas):", etiquetasActuales);
         if (etiquetasInput === null) return;
-        const etiquetas = etiquetasInput.split(",").map(etiqueta => etiqueta.trim());
+        const etiquetas = etiquetasInput.split(",");
 
         // Los almacenamos
         this.gasto.actualizarDescripcion(descripcion);
-        this.gasto.actualizarValor(parseFloat(valor));
+        this.gasto.actualizarValor(Number(valor));
         this.gasto.actualizarFecha(fecha);
-        this.gasto.anyadirEtiquetas(etiquetas);
+        this.gasto.anyadirEtiquetas(...etiquetas);
 
         // Repintamos la información actualizada
         repintar();
@@ -133,33 +139,82 @@ function mostrarDatoEnId(idElemento, valor) {
 }
 
 function mostrarGastoWeb(idElemento, gasto) {
-    let elemento = document.getElementById(idElemento);
+    const elemento = document.getElementById(idElemento);
 
     if (!elemento) {
         console.warn(`No se encontró ningún elemento con el id: ${idElemento}`);
         return;
     }
-
     
     // Obtenemos la fecha en formato legible
     const fechaGasto = new Date(gasto.fecha).toLocaleDateString();
 
-    // Creamos el div y spans de las etiquetas
-    const etiquetasGasto = gasto.etiquetas.map (etiqueta =>
-         `<span class="gasto-etiquetas-etiqueta">${etiqueta}</span>`).join('\n');
+    // Div class gasto
+    let divGasto = document.createElement("div");
+    divGasto.className = "gasto";
 
-    // Creamos el HTML del gasto
-    const htmlGasto = `
-        <div class="gasto">
-            <div class="gasto-descripcion">${gasto.descripcion}</div>
-            <div class="gasto-fecha">${fechaGasto}</div>
-            <div class="gasto-valor">${gasto.valor} €</div>
-            <div class="gasto-etiquetas">${etiquetasGasto}</div>
-        </div>
-    `;
+    // Div con la descripción
+    let divDescripcion = document.createElement("div");
+    divDescripcion.className = "gasto-descripcion";
+    divDescripcion.textContent = gasto.descripcion;
+    
+    // Div con la fecha
+    let divFecha = document.createElement("div");
+    divFecha.className = "gasto-fecha";
+    divFecha.textContent = fechaGasto;
 
-    // Insertamos el HTML del gasto en el elemento
-    elemento.innerHTML += htmlGasto;
+    // Div con el valor
+    let divValor = document.createElement("div");
+    divValor.className = "gasto-valor";
+    divValor.textContent = `${gasto.valor}`;
+
+    // Div con las etiquetas
+    let divEtiquetas = document.createElement("div");
+    divEtiquetas.className = "gasto-etiquetas";
+    
+    gasto.etiquetas.forEach(etiqueta => {
+        let spanEtiqueta = document.createElement("span");
+        spanEtiqueta.className = "gasto-etiquetas-etiqueta";
+        spanEtiqueta.textContent = etiqueta + " ";
+        divEtiquetas.appendChild(spanEtiqueta);
+
+        // borrar etiqueta al hacer click sobre ella
+        let borrarEtiquetaHandle = Object.create(BorrarEtiquetasHandle);
+        borrarEtiquetaHandle.gasto = gasto;
+        borrarEtiquetaHandle.etiqueta = etiqueta;
+        spanEtiqueta.addEventListener("click", borrarEtiquetaHandle);
+
+        divEtiquetas.appendChild(spanEtiqueta);
+    });
+
+    divGasto.append(divDescripcion, divFecha, divValor, divEtiquetas);
+
+    // Botón de editar
+    let botonEditar = document.createElement("button");
+    botonEditar.className = "gasto-editar";
+    botonEditar.type = "button";
+    botonEditar.textContent = "Editar";
+    
+    // Asociamos el manejador de eventos al botón de editar
+    // Importante: al ser un objeto reutilizable, debemos crear una nueva instancia para cada gasto, asignándole el gasto correspondiente
+    let editarBotonHandle = Object.create(EditarHandle);
+    editarBotonHandle.gasto = gasto;
+    botonEditar.addEventListener("click", editarBotonHandle);
+
+     // Botón de borrar
+     let botonBorrar = document.createElement("button");
+     botonBorrar.className = "gasto-borrar";
+     botonBorrar.type = "button";
+     botonBorrar.textContent = "Borrar";
+
+     // Asociamos el manejador de eventos al botón de borrar
+     let borrarBotonHandle = Object.create(BorrarHandle);
+     borrarBotonHandle.gasto = gasto;
+     botonBorrar.addEventListener("click", borrarBotonHandle);
+
+     divGasto.append(botonEditar, botonBorrar);
+
+     elemento.appendChild(divGasto);
 }
 
 function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
