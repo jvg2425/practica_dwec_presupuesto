@@ -1,5 +1,39 @@
 import * as Gestion from "./gestionPresupuesto.js";
 
+
+
+
+function repintar(){
+    // Mostrar el presupuesto en div#presupuesto
+    const presupuesto = Gestion.mostrarPresupuesto();
+    Web.mostrarDatoEnId("presupuesto", presupuesto);
+
+    // Mostrar los gasdos totales
+    const total = Gestion.calcularTotalGastos();
+    Web.mostrarDatoEnId("gastos-totales", total);
+
+    // Mostrar el balance total
+    const balance = Gestion.calcularBalance();
+    Web.mostrarDatoEnId("balance-total", balance);
+
+    // Borrar el listado completo de gastos previo
+    const divListadoGastos = document.getElementById("listado-gastos-completo");
+    if (divListadoGastos) {
+        divListadoGastos.innerHTML = "";
+    }
+
+    const listadoGastos = Gestion.listarGastos();
+    for (let i=0; i<listadoGastos.length ; i++){
+        Web.mostrarGastoWeb("listado-gastos-completo",listadoGastos[i])
+    }
+
+    divListadoGastos.innerHTML = "HOL"; // Limpiamos el listado previo
+}
+
+
+
+
+
 function mostrarDatoEnId(idElemento, valor) {
     const elemento = document.getElementById(idElemento);
     
