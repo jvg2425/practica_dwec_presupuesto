@@ -58,7 +58,7 @@ function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
     const listaDatos = agrup?.datos ? Object.entries(agrup.datos) : [];
 
     // HTML para para entrada del valor agrup.
-    // Usamos object.entries para iterar sobre las claves (periodos) y valores (gastos) del objeto agrup.datos
+    // Usamos object.entries para iterar sobre las claves (periodos) y valores (gastos) del objeto agrup
     const datosHTML = Object.entries(agrup).map(([periodo, gasto]) => `
         <div class="agrupacion-dato">
             <span class="agrupacion-dato-clave">${periodo}</span>
