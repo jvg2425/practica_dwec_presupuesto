@@ -309,7 +309,7 @@ let agrup3 = agruparGastos("mes", ["alimentacion"]);
 console.log("Agrupación por mes:", agrup1);
 console.log("Agrupación por día:", agrup2);
 console.log("Agrupación por mes (solo alimentación):", agrup3);
-*/
+/**/
 
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
 // Las funciones y objetos deben tener los nombres que se indican en el enunciado

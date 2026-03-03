@@ -9,13 +9,14 @@ function mostrarDatoEnId(idElemento, valor) {
 }
 
 function mostrarGastoWeb(idElemento, gasto) {
-    const elemento = document.getElementById(idElemento);
+    let elemento = document.getElementById(idElemento);
 
     if (!elemento) {
         console.warn(`No se encontró ningún elemento con el id: ${idElemento}`);
         return;
     }
 
+    
     // Obtenemos la fecha en formato legible
     const fechaGasto = new Date(gasto.fecha).toLocaleDateString();
 
@@ -28,7 +29,7 @@ function mostrarGastoWeb(idElemento, gasto) {
         <div class="gasto">
             <div class="gasto-descripcion">${gasto.descripcion}</div>
             <div class="gasto-fecha">${fechaGasto}</div>
-            <div class="gasto-valor">${gasto.importe} €</div>
+            <div class="gasto-valor">${gasto.valor} €</div>
             <div class="gasto-etiquetas">${etiquetasGasto}</div>
         </div>
     `;
@@ -38,11 +39,12 @@ function mostrarGastoWeb(idElemento, gasto) {
 }
 
 function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
-    const elemento = document.getElementById(idElemento);
+    let elemento = document.getElementById(idElemento);
     if (!elemento) {
         console.warn(`No se encontró ningún elemento con el id: ${idElemento}`);
         return;
     }
+    elemento.innerHTML = "BLA"; // Limpiamos el contenido previo del elemento
 
     // Traducir el periodo a un texto legible
     const periodoTraducido = {
@@ -52,9 +54,12 @@ function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
     }
     const periodoTexto = periodoTraducido[periodo] || periodo;
 
-    // HTML para para entrada del valro agrup.
+    // Verificamos que agrup.datos exista antes de iterar
+    const listaDatos = agrup?.datos ? Object.entries(agrup.datos) : [];
+
+    // HTML para para entrada del valor agrup.
     // Usamos object.entries para iterar sobre las claves (periodos) y valores (gastos) del objeto agrup.datos
-    const datosHTML = Object.entries(agrup.datos).map(([periodo, gasto]) => `
+    const datosHTML = Object.entries(agrup).map(([periodo, gasto]) => `
         <div class="agrupacion-dato">
             <span class="agrupacion-dato-clave">${periodo}</span>
             <span class="agrupacion-dato-valor">${gasto} €</span>
@@ -64,9 +69,7 @@ function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
     const htmlGrupo = `
         <div class="agrupacion">
             <h1>Gastos agrupados por ${periodoTexto}</h1>
-            <div class="agrupacion-datos">
                 ${datosHTML}
-            </div>
         </div>
     `;
 
