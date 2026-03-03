@@ -98,12 +98,23 @@ let EditarHandle = {
 }
 
 
-
 // Handler para borrar gasto
 let BorrarHandle = {
     handleEvent: function(event) {
         // Borramos el gasto
         Gestion.borrarGasto(this.gasto.id);
+
+        // Repintamos la información actualizada
+        repintar();
+    }
+}
+
+
+// Handler para borrar las etiquetas de un gasto
+let BorrarEtiquetasHandle = {
+    handleEvent: function(event) {
+        // Borramos las etiquetas del gasto
+        this.gasto.borrarEtiquetas(this.etiqueta);
 
         // Repintamos la información actualizada
         repintar();
