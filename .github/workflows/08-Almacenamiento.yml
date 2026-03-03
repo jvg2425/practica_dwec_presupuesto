@@ -1,11 +1,11 @@
-name: 08 - Almacenamiengo en el navegador - Tests
+name: 08 - Almacenamiento en el navegador - Tests
 
 on:
   push:
-    # Ejecutar la acción al hacer un push a la rama "master"
+    # Ejecutar la acción al hacer un push a la rama "main"
     branches: [ main ]
   pull_request:
-    # Ejecutar la acción al hacer una pull request a la rama "master"
+    # Ejecutar la acción al hacer una pull request a la rama "main"
     branches: [ main ]
 
 jobs:
