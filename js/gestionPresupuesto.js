@@ -57,7 +57,87 @@ function calcularBalance() {
 }
 
 // Función filtrarGastos
-function filtrarGastos(etiqueta) {
+function filtrarGastos(filtros = {}) {
+    // Filtros: fechaDesde, fedchaHasta, valorMinimo, valorMaximo, descipcionContiene, ...etiquetasTiene
+
+    const {
+        fechaDesde,
+        fechaHasta,
+        valorMinimo,
+        valorMaximo,
+        descripcionContiene,
+        etiquetasTiene
+    } = filtros;
+
+    // Parseo de fechas (si vienen)
+    const tsDesde = (typeof fechaDesde === 'string' && !isNaN(Date.parse(fechaDesde)))
+        ? Date.parse(fechaDesde)
+        : null;
+
+    const tsHasta = (typeof fechaHasta === 'string' && !isNaN(Date.parse(fechaHasta)))
+        ? Date.parse(fechaHasta)
+        : null;
+
+    // Texto a buscar en descripción (case-insensitive)
+    const textoDescripcion = (typeof descripcionContiene === 'string')
+        ? descripcionContiene.toLowerCase()
+        : null;
+
+    // Etiquetas a buscar (case-insensitive)
+    const etiquetasBuscadas = Array.isArray(etiquetasTiene)
+        ? etiquetasTiene.map(e => String(e).toLowerCase())
+        : null;
+
+    // Usamos filter sobre la variable global "gastos"
+    // Aplicada los filtros uno a uno, devolviendo solo los gastos que cumplan TODOS los filtros aplicados
+    return gastos.filter(gasto => {
+        // 1) Filtro por fecha desde
+        if (tsDesde !== null && gasto.fecha < tsDesde) {
+            return false;
+        }
+
+        // 2) Filtro por fecha hasta
+        if (tsHasta !== null && gasto.fecha > tsHasta) {
+            return false;
+        }
+
+        // 3) Filtro por valor mínimo
+        if (typeof valorMinimo === 'number' && gasto.valor < valorMinimo) {
+            return false;
+        }
+
+        // 4) Filtro por valor máximo
+        if (typeof valorMaximo === 'number' && gasto.valor > valorMaximo) {
+            return false;
+        }
+
+        // 5) Filtro por descripción contiene (case-insensitive)
+        if (textoDescripcion !== null) {
+            const desc = (gasto.descripcion || '').toLowerCase();
+            if (!desc.includes(textoDescripcion)) {
+                return false;
+            }
+        }
+
+        // 6) Filtro por etiquetasTiene (case-insensitive, coincide si tiene ALGUNA)
+        if (etiquetasBuscadas) {
+            const etiquetasGasto = Array.isArray(gasto.etiquetas)
+                ? gasto.etiquetas.map(e => String(e).toLowerCase())
+                : [];
+
+            const tieneAlguna = etiquetasBuscadas.some(tag =>
+                etiquetasGasto.includes(tag)
+            );
+
+            if (!tieneAlguna) {
+                return false;
+            }
+        }
+
+        // Si pasa todos los filtros, se incluye en el resultado
+        return true;
+    });
+
 }
 
 // Función agruparGastos
@@ -84,7 +164,7 @@ function CrearGasto(descripcion, valor, fecha, ...etiquetas) {
         this.etiquetas = [];
     }
 
-    // VAlidación de fecha
+    // Validación de fecha
     if (typeof fecha === 'string' && !isNaN(Date.parse(fecha))) {
         this.fecha = Date.parse(fecha);
     } else {
@@ -144,7 +224,31 @@ function CrearGasto(descripcion, valor, fecha, ...etiquetas) {
         return mensaje;
     }
 
+    // Método obtenerPeriodoAgrupacion
+    this.obtenerPeriodoAgrupacion = function(periodo) {
+        const fechaObj = new Date(this.fecha);
+
+        const anyo = fechaObj.getFullYear();
+        const mes = fechaObj.getMonth() + 1; // 0-11 + 1
+        const dia = fechaObj.getDate();
+
+        switch (periodo) {
+            case 'anyo':
+                return `${anyo}`;
+            case 'mes':
+                return `${anyo}-${mes.toString().padStart(2, '0')}`;
+            case 'dia':
+                return `${anyo}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
+                // padStart(2, "0") asegura el formato 09 en vez de 9.
+            default:
+                console.error('Periodo de agrupación no válido. Usar "día", "mes" o "año".');
+                return null;
+        }
+    }
+
 }
+
+
 
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
 // Las funciones y objetos deben tener los nombres que se indican en el enunciado
