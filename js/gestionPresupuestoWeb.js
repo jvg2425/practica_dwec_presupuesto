@@ -1,20 +1,18 @@
 import * as Gestion from "./gestionPresupuesto.js";
 
 
-
-
 function repintar(){
     // Mostrar el presupuesto en div#presupuesto
-    const presupuesto = Gestion.mostrarPresupuesto();
-    Web.mostrarDatoEnId("presupuesto", presupuesto);
+    const mensajePresupuesto = Gestion.mostrarPresupuesto();
+    mostrarDatoEnId("presupuesto", mensajePresupuesto);
 
     // Mostrar los gasdos totales
     const total = Gestion.calcularTotalGastos();
-    Web.mostrarDatoEnId("gastos-totales", total);
+    mostrarDatoEnId("gastos-totales", total);
 
     // Mostrar el balance total
     const balance = Gestion.calcularBalance();
-    Web.mostrarDatoEnId("balance-total", balance);
+    mostrarDatoEnId("balance-total", balance);
 
     // Borrar el listado completo de gastos previo
     const divListadoGastos = document.getElementById("listado-gastos-completo");
@@ -24,13 +22,26 @@ function repintar(){
 
     const listadoGastos = Gestion.listarGastos();
     for (let i=0; i<listadoGastos.length ; i++){
-        Web.mostrarGastoWeb("listado-gastos-completo",listadoGastos[i])
+        mostrarGastoWeb("listado-gastos-completo",listadoGastos[i])
     }
-
-    divListadoGastos.innerHTML = "HOL"; // Limpiamos el listado previo
 }
 
 
+function actualizarPresupuestoWeb(){
+    let nuevoPresupuesto = prompt("Introduce el nuevo presupuesto:");
+    if (nuevoPresupuesto !== null) {
+        nuevoPresupuesto = parseFloat(nuevoPresupuesto);
+        Gestion.actualizarPresupuesto(nuevoPresupuesto);
+        repintar();
+    }
+}
+// Añadimos el evento al botón de actualizar presupuesto
+const botonActualizar = document.getElementById("actualizarpresupuesto");
+if (botonActualizar) {
+    botonActualizar.addEventListener("click", actualizarPresupuestoWeb);
+} else {
+    console.warn("No se encontró el botón de actualizar presupuesto");
+}
 
 
 
