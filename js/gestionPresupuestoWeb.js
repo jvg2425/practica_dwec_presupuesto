@@ -72,6 +72,32 @@ if (botonAnyadirGasto) {
 }
 
 
+// Editor de gasto, usando un manejador de eventos y una función constructora
+let EditarHandle = {
+    handleEvent: function(event) {
+        // Pedimos los datos del nuevo gasto al usuario
+        const descripcion = prompt("Introduce la descripción del gasto:");
+        if (descripcion === null) return;
+        const valor = prompt("Introduce el valor del gasto:");
+        if (valor === null) return;
+        const fecha = prompt("Introduce la fecha del gasto (YYYY-MM-DD):");
+        if (fecha === null) return;
+        const etiquetasInput = prompt("Introduce las etiquetas del gasto (separadas por comas):");
+        if (etiquetasInput === null) return;
+        const etiquetas = etiquetasInput.split(",").map(etiqueta => etiqueta.trim());
+
+        // Los almacenamos
+        this.gasto.actualizarDescripcion(descripcion);
+        this.gasto.actualizarValor(parseFloat(valor));
+        this.gasto.actualizarFecha(fecha);
+        this.gasto.anyadirEtiquetas(etiquetas);
+
+        // Repintamos la información actualizada
+        repintar();
+    }
+}
+
+
 function mostrarDatoEnId(idElemento, valor) {
     const elemento = document.getElementById(idElemento);
     
