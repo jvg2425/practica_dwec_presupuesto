@@ -60,6 +60,11 @@ function calcularBalance() {
 function filtrarGastos(filtros = {}) {
     // Filtros: fechaDesde, fedchaHasta, valorMinimo, valorMaximo, descipcionContiene, ...etiquetasTiene
 
+        // Comprobamos que los filtros no sea null. Si lo son devolvemos todos los gastos sin filtrar
+    if (filtros === null || Object.keys(filtros).length === 0) {
+        return gastos;
+    }
+
     const {
         fechaDesde,
         fechaHasta,
@@ -141,7 +146,43 @@ function filtrarGastos(filtros = {}) {
 }
 
 // Función agruparGastos
-function agruparGastos() {
+function agruparGastos(periodo = "mes", etiquetas = [], fechaDesde = null, fechaHasta = null) {
+    // Configuramos el objeto de filtros
+    const opcionesFiltro = {
+        fechaDesde: fechaDesde,
+        fechaHasta: fechaHasta
+    };
+
+    // SOLO añadimos etiquetasTiene si el array tiene elementos
+    if (etiquetas && etiquetas.length > 0) {
+        opcionesFiltro.etiquetasTiene = etiquetas;
+    }
+
+    // 2. Ejecutar reduce sobre los gastos filtrados
+    // https://es.javascript.info/array-methods#reduce-reduceright
+    const gastosFiltrados = filtrarGastos(opcionesFiltro);
+    return gastosFiltrados.reduce((acumulador, gastoActual) => {
+        // Identificar bajo qué etiqueta de tiempo (día/mes/año) agrupamos este gasto
+        const periodoDeEsteGasto = gastoActual.obtenerPeriodoAgrupacion(periodo);
+
+        // Si el periodo no es válido, ignoramos este gasto y pasamos al siguiente
+        if (!periodoDeEsteGasto) {
+            return acumulador;
+        }
+
+        // Asegurarnos de que el acumulador tenga un número para ese periodo.
+        // Si es la primera vez que vemos este mes/día, inicializamos el contador en 0.
+        const valorAcumuladoHastaAhora = acumulador[periodoDeEsteGasto] || 0;
+
+        // Calculamos el nuevo total sumando el valor del gasto actual
+        const nuevoTotalDelPeriodo = valorAcumuladoHastaAhora + gastoActual.valor;
+
+        // Actualizamos el objeto acumulador con el nuevo total
+        acumulador[periodoDeEsteGasto] = nuevoTotalDelPeriodo;
+
+        // Devolvemos el objeto actualizado para la siguiente iteración
+        return acumulador;
+    }, {}); // El valor inicial es un objeto vacío {}
 }
 
 
@@ -249,6 +290,26 @@ function CrearGasto(descripcion, valor, fecha, ...etiquetas) {
 }
 
 
+/*
+// Pruebas para agruparGastos (descomentar para probar)
+gastos = [
+    new CrearGasto("Gasto 1", 5, "2021-09-30", "alimentacion"),
+    new CrearGasto("Gasto 1", 10, "2021-10-01", "alimentacion"),
+    new CrearGasto("Gasto 1", 12, "2021-10-02", "transporte"),
+    new CrearGasto("Gasto 1", 17, "2021-10-02", "alimentacion")
+];
+
+// Ahora, como son objetos creados con 'new CrearGasto', 
+// todos tienen el método .obtenerPeriodoAgrupacion() disponible.
+
+let agrup1 = agruparGastos("mes");
+let agrup2 = agruparGastos("dia");
+let agrup3 = agruparGastos("mes", ["alimentacion"]);
+
+console.log("Agrupación por mes:", agrup1);
+console.log("Agrupación por día:", agrup2);
+console.log("Agrupación por mes (solo alimentación):", agrup3);
+*/
 
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
 // Las funciones y objetos deben tener los nombres que se indican en el enunciado
