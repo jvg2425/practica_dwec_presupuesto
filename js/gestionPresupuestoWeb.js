@@ -36,12 +36,75 @@ const FormularioCerrar = {
     }
 }
 
+
+/**
+ * Constructor para el manejador del evento 'submit' del formulario de edición.
+ */
+function EditarActualizarGastoHandle() {
+    this.handleEvent = function (e) {
+        //console.log("EditarActualizarGastoHandle disparado para gasto:", this.gasto);
+        e.preventDefault();
+
+        // Actualizamos el gasto con los nuevos valores del formulario
+        this.gasto.actualizarDescripcion(e.currentTarget.descripcion.value);
+        this.gasto.actualizarValor(parseFloat(e.currentTarget.valor.value));
+        this.gasto.actualizarFecha(e.currentTarget.fecha.value);
+        
+        // Procesamos las etiquetas (limpiando espacios)
+        const etiquetas = e.currentTarget.etiquetas.value
+            .split(",")
+            .map(t => t.trim())
+            .filter(t => t !== "");
+        this.gasto.anyadirEtiquetas(...etiquetas);
+
+        // Repintamos (esto regenera la lista y elimina el formulario automáticamente)
+        repintar();
+    };
+}
+
+
 // Handler para el formulario de editar gasto.
 const EditarHandleFormulario = {
     handleEvent: function (e) {
         e.preventDefault() // Previene el envío por defecto del formulario.
+        // console.log("EditarHandleFormulario disparado para gasto:", this.gasto);
+
+        // Copiamos la estructura del formulario.
+        const plantillaFormulario = document.getElementById("formulario-template").content.cloneNode(true);
+        const formulario = plantillaFormulario.querySelector("form");
+        // Selecionamos el botón de cancelar dentro del formulario para asociarle el evento de cierre.
+        const botonCancelar = formulario.querySelector("button.cancelar");
+        
+        // Seleccionamos el botón de editar usado.
+        const botonActual = e.currentTarget; // El botón que ha disparado el evento, en este caso el de editar.
+
+        formulario.descripcion.value = this.gasto.descripcion;
+        formulario.valor.value = this.gasto.valor;
+        formulario.fecha.value = this.gasto.fecha;
+        formulario.etiquetas.value = this.gasto.etiquetas.join();
+
+        // Configuramos el manejador de eventos para el envío del formulario, pasándole las referencias necesarias.
+        //const actualizarHandle = Object.create(EditarActualizarGastoHandle);
+        const actualizarHandle = new EditarActualizarGastoHandle();
+        actualizarHandle.gasto = this.gasto;
+        actualizarHandle.formulario = formulario; // Pasamos referencia del form para borrarlo luego
+        formulario.addEventListener("submit", actualizarHandle);
+
+        // Configuramos el manejador de eventos para el botón de cancelar, pasándole las referencias necesarias.
+        const cancelarHandle = Object.create(FormularioCerrar);
+        cancelarHandle.formulario = formulario;
+        cancelarHandle.botonEditar = botonActual;
+        botonCancelar.addEventListener("click", cancelarHandle);
+
+        // Desactivamos el botón de editar para evitar múltiples formularios abiertos y añadimos el formulario al DOM.
+        botonActual.setAttribute("disabled", "disabled");
+        // botonActual.parentNode.appendChild(formularioTemplate);
+        // Insertamos el formulario justo después del botón o en su contenedor
+        botonActual.parentNode.appendChild(plantillaFormulario);
     }
 }
+
+
 
 
 /**
@@ -55,26 +118,26 @@ const FormularioCrearHandle = {
     handleEvent: function (e) {
         e.preventDefault(); // Evita que la página se recargue
 
-        // 1. Extraer valores usando los 'name' de los inputs del formulario
+        // Extraer valores usando los 'name' de los inputs del formulario
         const descripcion = e.currentTarget.descripcion.value;
         const valor = parseFloat(e.currentTarget.valor.value);
         const fecha = e.currentTarget.fecha.value;
         
-        // 2. Procesar etiquetas: split por coma y limpiar espacios
+        // Procesar etiquetas: split por coma y limpiar espacios
         const etiquetas = e.currentTarget.etiquetas.value
             .split(",")
             .map(t => t.trim())
             .filter(t => t !== ""); // Elimina etiquetas vacías
 
-        // 3. Crear el gasto usando el Operador Spread (...)
+        // Crear el gasto usando el Operador Spread (...)
         // Esto envía cada elemento del array como un argumento individual al constructor
         const nuevoGasto = new Gestion.CrearGasto(descripcion, valor, fecha, ...etiquetas);
         
-        // 4. Persistir y actualizar la vista
+        // Persistir y actualizar la vista
         Gestion.anyadirGasto(nuevoGasto);
         repintar(); // Función global que refresca el DOM
 
-        // 5. Limpieza: eliminar formulario y reactivar el botón de apertura
+        // Limpieza: eliminar formulario y reactivar el botón de apertura
         this.formulario.remove();
         this.botonAbrir.removeAttribute("disabled");
     }
@@ -352,10 +415,12 @@ function mostrarGastoWeb(idElemento, gasto) {
      botonEditarFormulario.className = "gasto-editar-formulario";
      botonEditarFormulario.type = "button";
      botonEditarFormulario.textContent = "Editar (formulario)";
-
+     
      // Manejadror de eventos para el botón de editar con formulario
-    let editarFormularioHandle = Object.create(FormularioCerrar);
-    // TODO
+    let editarFormBoton = Object.create(EditarHandleFormulario);
+    editarFormBoton.gasto = gasto;
+    botonEditarFormulario.addEventListener("click", editarFormBoton);
+
      divGasto.append(botonEditar, botonBorrar, botonEditarFormulario);
 
      elemento.appendChild(divGasto);
