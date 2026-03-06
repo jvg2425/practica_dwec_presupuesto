@@ -186,7 +186,7 @@ function nuevoGastoWebFormulario(e) {
 }
 
 
-// Añaidmos el evento al botón de añadir gasto
+// Añadimos el evento al botón de añadir gasto
 const botonAnyadirGastoFormulario = document.getElementById("anyadirgasto-formulario");
 if (botonAnyadirGastoFormulario) {
     botonAnyadirGastoFormulario.addEventListener("click", nuevoGastoWebFormulario);
@@ -338,7 +338,8 @@ function mostrarDatoEnId(idElemento, valor) {
 
 function mostrarGastoWeb(idElemento, gasto) {
     const elemento = document.getElementById(idElemento);
-
+    // console.log("Mostrando gasto en web:", gasto);
+    // console.log("con idElemento:", idElemento);
     if (!elemento) {
         console.warn(`No se encontró ningún elemento con el id: ${idElemento}`);
         return;
@@ -463,6 +464,69 @@ function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
 
     // Insertamos el HTML de la agrupación en el elemento
     elemento.innerHTML = htmlGrupo;
+}
+
+
+
+function filtrarGastosWeb(e) {
+    console.log("filtrarGastosWeb disparado");
+    e.preventDefault(); // Evita que el formulario se envíe y la página se recargue
+
+    // Obtenemos los valores de los campos del formulario
+    // Como los id's contienen "-", no podemos acceder a ellos con e.currentTarget.campo.value, por lo que usamos e.currentTarget["campo"].value
+    // filtrarGastos espera un objeto tipo diccionario con las claves: fechaDesde, fechaHasta, valorMinimo, valorMaximo, descripcionContiene, etiquetasTiene
+    const filtros = {};
+
+    const descripcion = e.currentTarget["formulario-filtrado-descripcion"].value.trim() ||null;
+    if (descripcion) {
+        filtros.descripcionContiene = descripcion;
+    }
+    // Valores numéricos: si el campo está vacío o no es un número válido, lo dejamos como null para no filtrar por ese criterio. Evita error NaN.
+    const valorMinimo = parseFloat(e.currentTarget["formulario-filtrado-valor-minimo"].value);
+    if (!isNaN(valorMinimo)) {
+        filtros.valorMinimo = valorMinimo;
+    }
+    const valorMaximo = parseFloat(e.currentTarget["formulario-filtrado-valor-maximo"].value);
+    if (!isNaN(valorMaximo)) {
+        filtros.valorMaximo = valorMaximo;
+    }
+
+    const fechaDesde = e.currentTarget["formulario-filtrado-fecha-desde"].value;
+    if (fechaDesde) {
+        filtros.fechaDesde = fechaDesde;
+    }
+    const fechaHasta = e.currentTarget["formulario-filtrado-fecha-hasta"].value;
+    if (fechaHasta) {
+        filtros.fechaHasta = fechaHasta;
+    }
+
+    const etiquetas = e.currentTarget["formulario-filtrado-etiquetas-tiene"].value.trim();
+    filtros.etiquetasTiene = etiquetas ? Gestion.transformarListadoEtiquetas(etiquetas) : null;
+
+    console.log("Filtros obtenidos del formulario:", filtros);
+
+    // Limpiamos el listado previo de gastos filtrados/completos
+    const divListadoGastos = document.getElementById("listado-gastos-completo");
+    if (divListadoGastos) {
+        divListadoGastos.innerHTML = "";
+    }
+
+    // Obtenemos el listado de gastos filtrados usando la función de gestión
+    const gastosFiltrados = Gestion.filtrarGastos(filtros);
+    console.log("Gastos filtrados:", gastosFiltrados);
+
+    // Mostramos los gastos filtrados en el DOM
+    for (let i=0; i<gastosFiltrados.length ; i++){
+        mostrarGastoWeb("listado-gastos-completo", gastosFiltrados[i])
+    }
+}
+// Añadimos el evento al botón de filtrar gastos
+// Obtenemos el formulario de filtrado
+const formularioFiltrar = document.getElementById("formulario-filtrado");
+if (formularioFiltrar) {
+    formularioFiltrar.addEventListener("submit", filtrarGastosWeb);
+} else {
+    console.warn("No se encontró el formulario de filtrado con id 'formulario-filtrar'");
 }
 
 
