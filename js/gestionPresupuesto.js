@@ -289,6 +289,10 @@ function CrearGasto(descripcion, valor, fecha, ...etiquetas) {
 
 }
 
+function transformarListadoEtiquetas(etiquetasTiene) {
+
+}
+
 
 /*
 // Pruebas para agruparGastos (descomentar para probar)
@@ -324,5 +328,6 @@ export   {
     calcularTotalGastos,
     calcularBalance,
     filtrarGastos,
-    agruparGastos
+    agruparGastos,
+    transformarListadoEtiquetas
 }
