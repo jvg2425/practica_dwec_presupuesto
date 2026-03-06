@@ -289,9 +289,39 @@ function CrearGasto(descripcion, valor, fecha, ...etiquetas) {
 
 }
 
-function transformarListadoEtiquetas(etiquetasTiene) {
 
+function transformarListadoEtiquetas(listadoEtiquetas) {
+    // Si no hay entrada o no es un string, devolvemos un array vacío
+    if (!listadoEtiquetas || typeof listadoEtiquetas !== 'string') {
+        return [];
+    }
+    const forma = 2;
+
+    // Pongo varias formas de obtener este resultado, como práctica de regexp.
+    if (forma == 1) {
+        // Definimos la expresión regular:
+        // El '+' permite que múltiples separadores seguidos cuenten como uno solo
+        const patronSeparadores = /[ ,.:;]+/;
+
+        // Aplicamos el split con la RegExp y filtramos para evitar strings vacíos
+        return listadoEtiquetas
+            .trim()                  // Quita espacios en los extremos del string global
+            .split(patronSeparadores)  // Divide usando el patrón flexible
+            .filter(etiqueta => etiqueta.length > 0); // Elimina resultados vacíos (",,")
+    } else if (forma == 2) {
+        // Definimos el patrón: busca grupos de caracteres que NO sean separadores. ^ dentro de [] significa "no estos caracteres"
+        const patronEtiquetas = /[^ ,.:;]+/g;
+        // /g: Bandera global para que no se detenga en la primera coincidencia y recorra todo el string
+
+        // .match() devuelve un array con todas las coincidencias encontradas
+        // Si no hay ninguna coincidencia, devuelve null, por eso usamos el "|| []"
+        const resultado = listadoEtiquetas.match(patronEtiquetas);
+
+        return resultado || [];
+    }
 }
+
+
 
 
 /*
