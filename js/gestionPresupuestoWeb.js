@@ -80,7 +80,9 @@ const EditarHandleFormulario = {
 
         formulario.descripcion.value = this.gasto.descripcion;
         formulario.valor.value = this.gasto.valor;
-        formulario.fecha.value = this.gasto.fecha;
+        console.log("Valor de this.gasto.fecha:", this.gasto.fecha);
+        formulario.fecha.value = new Date(this.gasto.fecha).toISOString().split('T')[0];
+        //formulario.fecha.value = this.gasto.fecha;
         formulario.etiquetas.value = this.gasto.etiquetas.join();
 
         // Configuramos el manejador de eventos para el envío del formulario, pasándole las referencias necesarias.
@@ -95,6 +97,14 @@ const EditarHandleFormulario = {
         cancelarHandle.formulario = formulario;
         cancelarHandle.botonEditar = botonActual;
         botonCancelar.addEventListener("click", cancelarHandle);
+
+        // Configuramos el manejador de eventos para el botón de enviar a la API, pasándole las referencias necesarias.
+        const buttonEnviarApi = new EditarActualizarGastoApiHandle();
+        buttonEnviarApi.gasto = this.gasto;
+        const botonEnviarApiElemento = plantillaFormulario.querySelector(".gasto-enviar-api");
+        if (botonEnviarApiElemento) {
+            botonEnviarApiElemento.addEventListener("click", buttonEnviarApi);
+        }
 
         // Desactivamos el botón de editar para evitar múltiples formularios abiertos y añadimos el formulario al DOM.
         botonActual.setAttribute("disabled", "disabled");
@@ -673,6 +683,55 @@ async function formularioEnviarApiHandle(e) {
     formulario.remove();
     document.getElementById("anyadirgasto-formulario").removeAttribute("disabled")
 }
+
+
+/**
+ * Constructor para el manejador del evento 'submit' del formulario de edición.
+ */
+function EditarActualizarGastoApiHandle() {
+    this.handleEvent = async function (e) {
+        console.log("EditarActualizarGastoApiHandle disparado para gasto:", this.gasto);
+        //console.log("EditarActualizarGastoHandle disparado para gasto:", this.gasto);
+        e.preventDefault();
+
+        // fomlario
+        const formulario = e.currentTarget.form;
+        // Almacenamos los valores del formulario
+        const descripcion = formulario.descripcion.value;
+        //console.log("Descripción del formulario:", descripcion);
+        const valor = parseFloat(formulario.valor.value);
+        const fecha = formulario.fecha.value;
+        const etiquetasInput = formulario.etiquetas.value.trim();
+        const etiquetas = etiquetasInput ? Gestion.transformarListadoEtiquetas(etiquetasInput) : [];
+        console.log("valor de la fecha del formulario:", fecha);
+        // Creamos un nuevo gasto con los datos actualizados
+        const gastoActualizado = new Gestion.CrearGasto(descripcion, valor, fecha, ...etiquetas);
+
+        // Datos para la API
+        const nombreUsuario = document.getElementById("nombre_usuario").value;
+        const urlActualizar = API_URL + nombreUsuario + "/" + this.gasto.gastoId; // Reemplaza con la URL real de tu endpoint de actualización
+
+        // Realizamos la petición PUT a la API para actualizar el gasto
+        const response = await fetch(urlActualizar, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8'
+            },
+            body: JSON.stringify(gastoActualizado)
+        });
+
+        // Respuesta
+        if (response.ok) {
+            console.log("Gasto actualizado correctamente en la API");
+        } else {
+            console.log("Error al actualizar gasto en la API. Código de estado:", response.status);
+        }
+
+        cargarGastosApi(); // Recargamos los gastos desde la API para actualizar la vista
+
+    };
+}
+
 
 
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
