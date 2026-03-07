@@ -429,7 +429,9 @@ function mostrarGastoWeb(idElemento, gasto) {
     botonBorrarApi.textContent = "Borrar (API)";
 
     // Manejador de eventos para el botón de borrar con API
-    // TODO
+    let borrarApiBotonHandle = Object.create(BorrarApiHandle);
+    borrarApiBotonHandle.gasto = gasto;
+    botonBorrarApi.addEventListener("click", borrarApiBotonHandle);
 
     // Añadimos los botones al div del gasto y luego el div al elemento principal
      divGasto.append(botonEditar, botonBorrar, botonBorrarApi, botonEditarFormulario);
@@ -596,6 +598,32 @@ const botonCargarApi = document.getElementById("cargar-gastos-api");
 if (botonCargarApi) {
     botonCargarApi.addEventListener("click", cargarGastosApi);
 }
+
+
+// Handler para borrar gasto mediante API
+let BorrarApiHandle = {
+    handleEvent: async function(event) {
+        const nombreUsuario = document.getElementById("nombre_usuario").value;
+        console.log("BorrarHandleApi disparado para gasto:", this.gasto.id);
+        // url
+        const urlBorrar = API_URL + nombreUsuario + "/" + this.gasto.id; // Reemplaza con la URL real de tu endpoint de borrado
+        // Realizamos la petición DELETE a la API
+        const response = await fetch(urlBorrar, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            console.log("Gasto borrado correctamente en la API");
+            cargarGastosApi(); // Recargamos los gastos desde la API para actualizar la vista
+        } else {
+            console.log("Error al borrar gasto desde la API. Código de estado:", response.status);
+        }
+
+        // Repintamos la información actualizada
+        repintar();
+    }
+}
+
 
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
 // Las funciones y objetos deben tener los nombres que se indican en el enunciado
