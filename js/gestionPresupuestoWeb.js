@@ -529,6 +529,17 @@ if (formularioFiltrar) {
     console.warn("No se encontró el formulario de filtrado con id 'formulario-filtrar'");
 }
 
+function guardarGastosWeb() {
+    // console.log("guardarGastosWeb disparado");
+    localStorage.setItem("GestorGastosDWEC", JSON.stringify(Gestion.listarGastos()));
+
+}
+const botonGuardar = document.getElementById("guardar-gastos");
+if (botonGuardar) {
+    botonGuardar.addEventListener("click", guardarGastosWeb);
+}
+
+
 
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
 // Las funciones y objetos deben tener los nombres que se indican en el enunciado
