@@ -422,8 +422,17 @@ function mostrarGastoWeb(idElemento, gasto) {
     editarFormBoton.gasto = gasto;
     botonEditarFormulario.addEventListener("click", editarFormBoton);
 
-     divGasto.append(botonEditar, botonBorrar, botonEditarFormulario);
+    // Botón de Borrar (API)
+    let botonBorrarApi = document.createElement("button");
+    botonBorrarApi.className = "gasto-borrar-api";
+    botonBorrarApi.type = "button";
+    botonBorrarApi.textContent = "Borrar (API)";
 
+    // Manejador de eventos para el botón de borrar con API
+    // TODO
+
+    // Añadimos los botones al div del gasto y luego el div al elemento principal
+     divGasto.append(botonEditar, botonBorrar, botonBorrarApi, botonEditarFormulario);
      elemento.appendChild(divGasto);
 }
 
