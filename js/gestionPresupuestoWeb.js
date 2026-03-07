@@ -24,8 +24,13 @@ function repintar(){
     for (let i=0; i<listadoGastos.length ; i++){
         mostrarGastoWeb("listado-gastos-completo",listadoGastos[i])
     }
-}
 
+    mostrarGastosAgrupadosWeb("agrupacion-anyo", Gestion.agruparGastos("anyo"),"anyo")
+    mostrarGastosAgrupadosWeb("agrupacion-mes", Gestion.agruparGastos("mes"),"mes")
+    mostrarGastosAgrupadosWeb("agrupacion-dia", Gestion.agruparGastos("dia"),"dia")
+
+
+}
 
 
 // Handler para cerrar formularios. Cierra el form y habilita el botón de añadir gasto.
