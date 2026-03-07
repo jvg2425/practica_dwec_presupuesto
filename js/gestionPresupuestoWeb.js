@@ -178,6 +178,13 @@ function nuevoGastoWebFormulario(e) {
     cancelarHandle.botonEditar = botonActual;
     botonCancelar.addEventListener("click", cancelarHandle);
 
+
+    // Handle para enviar gasto a la API (desde el formulario de creación)
+    const buttonEnviarApi = plantilla.querySelector(".gasto-enviar-api");
+    if (buttonEnviarApi) {
+        buttonEnviarApi.addEventListener("click", formularioEnviarApiHandle);
+    }
+
     // Estado de la interfaz: deshabilitar botón y mostrar formulario
     botonActual.setAttribute("disabled", "disabled");
     
@@ -604,9 +611,9 @@ if (botonCargarApi) {
 let BorrarApiHandle = {
     handleEvent: async function(event) {
         const nombreUsuario = document.getElementById("nombre_usuario").value;
-        console.log("BorrarHandleApi disparado para gasto:", this.gasto.id);
+        console.log("BorrarHandleApi disparado para gasto:", this.gasto.gastoId);
         // url
-        const urlBorrar = API_URL + nombreUsuario + "/" + this.gasto.id; // Reemplaza con la URL real de tu endpoint de borrado
+        const urlBorrar = API_URL + nombreUsuario + "/" + this.gasto.gastoId; // Reemplaza con la URL real de tu endpoint de borrado
         // Realizamos la petición DELETE a la API
         const response = await fetch(urlBorrar, {
             method: 'DELETE'
@@ -622,6 +629,49 @@ let BorrarApiHandle = {
         // Repintamos la información actualizada
         repintar();
     }
+}
+
+
+// Handler para enviar gasto mediante API (desde el formulario de creación)
+async function formularioEnviarApiHandle(e) {
+    // console.log("FormularioEnviarApiHandle disparado para formulario API");
+    e.preventDefault(); // Evita que la página se recargue
+    const nombreUsuario = document.getElementById("nombre_usuario").value;
+
+    // Referencia al formulario (está en el mismo nodo que el botón, por lo que podemos usar parentNode)
+    const formulario = e.currentTarget.form;
+
+    // Extraer los datos del formulario
+    const descripcion = formulario.descripcion.value;
+    const valor = parseFloat(formulario.valor.value);
+    const fecha = formulario.fecha.value;
+    const etiquetasInput = formulario.etiquetas.value.trim();
+    const etiquetas = etiquetasInput ? Gestion.transformarListadoEtiquetas(etiquetasInput) : [];
+
+    // Crear el nuevo gasto
+    const nuevoGasto = new Gestion.CrearGasto(descripcion, valor, fecha, ...etiquetas);
+    // console.log("Enviando nuevo gasto a la API:", nuevoGasto);
+
+    // Realizamos la petición POST a la API para crear el nuevo gasto
+    const response = await fetch(API_URL + nombreUsuario, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8'
+        },
+        body: JSON.stringify(nuevoGasto)
+    });
+
+    if (response.ok) {
+        console.log("Gasto creado correctamente en la API");
+    } else {
+        console.log("Error al crear gasto en la API. Código de estado:", response.status);
+    }
+
+    repintar(); // Función global que refresca el DOM
+
+    // Limpieza: eliminar formulario y reactivar el botón de apertura
+    formulario.remove();
+    document.getElementById("anyadirgasto-formulario").removeAttribute("disabled")
 }
 
 
