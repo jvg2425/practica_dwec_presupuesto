@@ -559,7 +559,7 @@ if (botonCargar) {
 // Elementos de la API
 const API_URL = "https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/"; // Reemplaza con la URL real de tu API
 
-async function cargarGastosAp() {
+async function cargarGastosApi() {
     console.log("cargarGastosAp disparado");
     // Usuario
     const nombreUsuario = document.getElementById("nombre_usuario").value;
@@ -567,12 +567,25 @@ async function cargarGastosAp() {
 
     // Realizamos la petición a la API
     const response = await fetch(urlConUsuario);
+    //console.log("Respuesta de la API:", response);
 
-    console.log("Respuesta de la API:", response);
+    if (response.ok) {
+        const gastosApi = await response.json();
+        if (Array.isArray(gastosApi)) {
+            Gestion.cargarGastos(gastosApi);
+        } else {
+            Gestion.cargarGastos([]); // Si la respuesta no es un array, cargamos un array vacío para no tener datos previos
+            console.warn("La respuesta de la API no es un array:", gastosApi);
+        }
+    } else {
+        console.log("Error al cargar gastos desde la API. Código de estado:", response.status);
+        Gestion.cargarGastos([]); // En caso de error, cargamos un array vacío para no tener datos previos
+    }
+    repintar(); // Repintamos la información actualizada
 }
 const botonCargarApi = document.getElementById("cargar-gastos-api");
 if (botonCargarApi) {
-    botonCargarApi.addEventListener("click", cargarGastosAp);
+    botonCargarApi.addEventListener("click", cargarGastosApi);
 }
 
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
