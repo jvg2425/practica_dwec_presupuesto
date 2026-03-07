@@ -555,8 +555,20 @@ if (botonCargar) {
     botonCargar.addEventListener("click", cargarGastosWeb);
 }
 
-function cargarGastosAp() {
+
+// Elementos de la API
+const API_URL = "https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/"; // Reemplaza con la URL real de tu API
+
+async function cargarGastosAp() {
     console.log("cargarGastosAp disparado");
+    // Usuario
+    const nombreUsuario = document.getElementById("nombre_usuario").value;
+    const urlConUsuario = API_URL + nombreUsuario;
+
+    // Realizamos la petición a la API
+    const response = await fetch(urlConUsuario);
+
+    console.log("Respuesta de la API:", response);
 }
 const botonCargarApi = document.getElementById("cargar-gastos-api");
 if (botonCargarApi) {
