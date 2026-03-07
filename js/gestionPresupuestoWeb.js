@@ -667,7 +667,7 @@ async function formularioEnviarApiHandle(e) {
         console.log("Error al crear gasto en la API. Código de estado:", response.status);
     }
 
-    repintar(); // Función global que refresca el DOM
+    cargarGastosApi(); // Recargamos los gastos desde la API para actualizar la vista
 
     // Limpieza: eliminar formulario y reactivar el botón de apertura
     formulario.remove();
