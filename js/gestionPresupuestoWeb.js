@@ -540,6 +540,22 @@ if (botonGuardar) {
 }
 
 
+function cargarGastosWeb() {
+    // console.log("cargarGastosWeb disparado");
+    const gastosGuardados = localStorage.getItem("GestorGastosDWEC");
+    if (gastosGuardados) {
+        Gestion.cargarGastos(JSON.parse(gastosGuardados));
+    } else {
+        Gestion.cargarGastos([]); // Si no hay gastos guardados, cargamos un array vacío para no tener datos previos
+    }
+    repintar(); // Repintamos la información actualizada
+}
+const botonCargar = document.getElementById("cargar-gastos");
+if (botonCargar) {
+    botonCargar.addEventListener("click", cargarGastosWeb);
+}
+
+
 
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
 // Las funciones y objetos deben tener los nombres que se indican en el enunciado
